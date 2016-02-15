@@ -101,6 +101,8 @@ if (isset($_REQUEST['rss'])) {
 	    <link>http://monetdb.cwi.nl/testweb/web/eanthony/</link>
 	    <description>asdfree tests with MonetDB.R and MonetDBLite</description>';
 
+	$counter = 0;
+
 	foreach($runs as $r) {
 		$runinfo = "Run started at $r[runp] using R $r[rver] and MonetDB $r[mbranch]/$r[mrev]";
 		foreach($tests as $t) {
@@ -115,6 +117,10 @@ if (isset($_REQUEST['rss'])) {
 	      <description>$logtail</description>
 	      <guid>http://monetdb.cwi.nl/testweb/web/eanthony/#$r[host]-$r[run]-$t</guid>
 	    </item>";
+	    
+		if ($counter >= 25) break;
+		$counter++;
+		
 			}
 		}
 	}
