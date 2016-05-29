@@ -10,6 +10,11 @@ fi
 uname | grep -v CYGWIN > /dev/null
 ISWIN=$?
 
+# download the current sha of the repository from the github api into a file
+curl https://api.github.com/repos/hannesmuehleisen/MonetDBLite/git/refs/heads/master > start_sha
+
+any_failures=false
+
 while :
 do
 	RUNID=`date +%s`
@@ -106,11 +111,13 @@ do
 		timeout -k 40h 30h $RBIN -f $BASEDIR/$RSCRIPT-setup.R 2>&1 | awk '{print strftime("%Y-%m-%d %H:%M:%S"), $0; fflush(); }' > $LOGDIR/$RSCRIPT.log 
 		if [ $? != 0 ]; then
 		 	echo "$RSCRIPT setup fail"
+		 	any_failures = true
 		 else
 		 	touch $LOGDIR/$RSCRIPT-setup-success
 			timeout -k 40h 30h $RBIN -f $BASEDIR/$RSCRIPT-test.R 2>&1 | awk '{print strftime("%Y-%m-%d %H:%M:%S"), $0; fflush(); }' >> $LOGDIR/$RSCRIPT.log 
 			if [ $? != 0 ]; then
 				echo "$RSCRIPT test fail"
+				any_failures = true
 			else
 				touch $LOGDIR/$RSCRIPT-test-success
 			fi
@@ -123,6 +130,29 @@ do
 	wait
 	touch $LOGDIR/complete
 	sleep 10
+
+	# if this was a perfect run (zero failures)
+	if any_failures = false ; then
+		
+		different_lines = 0
+		
+		# if the github api says that nothing has changed since the prior perfect run
+		while different_lines = 0 
+		do
+			# wait sixty seconds
+			sleep 60
+		
+			# re-download the sha info from github
+			curl https://api.github.com/repos/hannesmuehleisen/MonetDBLite/git/refs/heads/master > end_sha
+	
+			# compare the starting and ending sha files
+			diff -u start_sha end_sha > diff_sha
+	
+			# figure out the number of different lines
+			different_lines = wc -l < diff_sha
+		done
+	fi
+	
 done
 
 
